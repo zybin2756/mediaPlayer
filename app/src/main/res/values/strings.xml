@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">mediaPlayer</string>
+    <string name="txt_starting">正在启动..</string>
+    <string name="txt_localvideo">本地视频</string>
+    <string name="txt_localmusic">本地音乐</string>
+    <string name="txt_netvideo">网络视频</string>
+    <string name="txt_netmusic">网络音乐</string>
+</resources>
