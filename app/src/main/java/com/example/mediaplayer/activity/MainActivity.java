@@ -33,7 +33,7 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
     private RadioButton rb_netvideo;
     private RadioButton rb_netmusic;
     private RadioGroup  rb_bottom_group;
-    private List<BasePager> basePagers;
+    private List<BasePager> basePagers; //存放pager列表
     private FrameLayout fl_main;
     private int Pos = 0;
     @Override
@@ -94,6 +94,9 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         setFragment();
     }
 
+    /**
+     * 用于替换fragment
+     */
     private void setFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft =  fragmentManager.beginTransaction();
@@ -101,9 +104,11 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         ft.commit();
     }
 
+    //从获取相应的pager
     private BasePager getBasePager() {
         BasePager basePager = basePagers.get(Pos);
-        if(basePager != null && !basePager.isInitData){
+
+        if(basePager != null && !basePager.isInitData){ //数据没有加载就加载数据。
             basePager.initData();
             basePager.isInitData = true;
         }

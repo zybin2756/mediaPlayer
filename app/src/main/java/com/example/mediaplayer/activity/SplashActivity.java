@@ -30,6 +30,7 @@ public class SplashActivity extends AppCompatActivity{
 
     @Override
     protected void onDestroy() {
+        //移除消息
         handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
@@ -43,6 +44,7 @@ public class SplashActivity extends AppCompatActivity{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //触摸跳过启动页
         startMainActivity();
         return super.onTouchEvent(event);
     }
