@@ -55,7 +55,7 @@
     </FrameLayout>
     <RadioGroup
         android:id="@+id/rb_bottom_group"
-        android:background="#6da7e1"
+        android:background="#ccc"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_centerInParent="true"
