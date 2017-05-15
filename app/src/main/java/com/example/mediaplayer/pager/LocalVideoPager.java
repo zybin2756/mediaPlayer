@@ -2,23 +2,25 @@ package com.example.mediaplayer.pager;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.mediaplayer.R;
+import com.example.mediaplayer.activity.VideoPlayActivity;
+import com.example.mediaplayer.adapter.LocalVideoListAdapter;
 import com.example.mediaplayer.base.BasePager;
+import com.example.mediaplayer.mListener.mVideoItemClickListener;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,7 @@ import domain.MediaBean;
  * 本地视频
  */
 
-public class LocalVideoPager  extends BasePager{
+public class LocalVideoPager  extends BasePager implements mVideoItemClickListener {
 
     private RecyclerView video_list; //列表
     private TextView tv_nomedia; //没有视频
@@ -45,8 +47,15 @@ public class LocalVideoPager  extends BasePager{
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if(mediaList != null && mediaList.size() > 0){
-
+                LocalVideoListAdapter adapter = new LocalVideoListAdapter(context,mediaList,LocalVideoPager.this);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+                video_list.setLayoutManager(layoutManager);
+                video_list.setAdapter(adapter);
+                video_list.setVisibility(View.VISIBLE);
+            }else{
+                tv_nomedia.setVisibility(View.VISIBLE);
             }
+            pb_loading.setVisibility(View.GONE);
         }
     };
     @Override
@@ -64,6 +73,9 @@ public class LocalVideoPager  extends BasePager{
         new Thread(new Runnable() {
             @Override
             public void run() {
+                pb_loading.setVisibility(View.VISIBLE);
+                tv_nomedia.setVisibility(View.GONE);
+                video_list.setVisibility(View.GONE);
                 mediaList = new ArrayList<MediaBean>();
                 ContentResolver contentResolver = context.getContentResolver();
                 Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -80,26 +92,40 @@ public class LocalVideoPager  extends BasePager{
                         MediaBean bean = new MediaBean();
                         mediaList.add(bean);
 
-                        String name = cursor.getString(0);
+                        String name = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));
                         bean.setName(name);
 
-                        long duration = cursor.getLong(1);
+                        long duration = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
                         bean.setDuration(duration);
 
-                        long size = cursor.getLong(2);
+                        long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.SIZE));
                         bean.setSize(size);
 
-                        String data = cursor.getString(3);
+                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
                         bean.setData(data);
 
-                        String artist = cursor.getString(4);
+                        String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.ARTIST));
                         bean.setArtist(artist);
+
+                        Log.i("zyb",bean.toString());
                     }
                 }
+                cursor.close();
             }
         }).start();
 
+        handler.sendEmptyMessage(0);
 
+    }
 
+    @Override
+    public void onClick(View v, int position) {
+        MediaBean bean = mediaList.get(position);
+        if(bean != null){
+            Intent intent = new Intent(context,VideoPlayActivity.class);
+            Uri uri = Uri.parse(bean.getData());
+            intent.setDataAndType(uri,"video/*");
+            context.startActivity(intent);
+        }
     }
 }

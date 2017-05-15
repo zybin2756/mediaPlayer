@@ -1,4 +1,4 @@
-package utils;
+package com.example.mediaplayer.base;
 
 import android.content.Context;
 import android.util.AttributeSet;

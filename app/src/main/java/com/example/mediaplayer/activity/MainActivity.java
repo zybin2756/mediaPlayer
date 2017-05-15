@@ -3,15 +3,9 @@ package com.example.mediaplayer.activity;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -34,14 +28,12 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
     private RadioButton rb_netmusic;
     private RadioGroup  rb_bottom_group;
     private List<BasePager> basePagers; //存放pager列表
-    private FrameLayout fl_main;
     private int Pos = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fl_main = (FrameLayout) findViewById(R.id.fl_main);
         rb_localvideo = (RadioButton) findViewById(R.id.rb_localvideo);
         rb_localmusic = (RadioButton) findViewById(R.id.rb_localmusic);
         rb_netvideo = (RadioButton) findViewById(R.id.rb_netvideo);

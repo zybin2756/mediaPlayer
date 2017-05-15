@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.mediaplayer.activity.MainActivity">
-    <utils.TitleBar
+    <com.example.mediaplayer.base.TitleBar
+        android:id="@+id/titleBar"
         android:background="#ff3097fd"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-
             android:layout_margin="10dp"
             android:textSize="20sp"
             android:textColor="#fff"
@@ -38,20 +38,24 @@
         <ImageView
             android:id="@+id/img_history"
             android:layout_margin="8dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginEnd="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/history"
+            android:background="@drawable/rb_history_selector"
             tools:ignore="ContentDescription" />
-    </utils.TitleBar>
+    </com.example.mediaplayer.base.TitleBar>
     <FrameLayout
+        android:layout_below="@+id/titleBar"
         android:id="@+id/fl_main"
+        android:layout_centerInParent="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </FrameLayout>
     <RadioGroup
         android:id="@+id/rb_bottom_group"
-        android:background="#11000000"
+        android:background="#6da7e1"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_centerInParent="true"
