@@ -1,8 +1,10 @@
 package com.example.mediaplayer.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +46,9 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     private ImageButton btnPlayOrPause;
     private ImageButton btnNext;
     private ImageButton btnFullOrNormal;
+
+
+    private mReceiver receiver;
 
     private Handler handler = new Handler(){
         @Override
@@ -91,8 +96,15 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         findViews();
+
+
+        //注册电量变化广播
+        receiver = new mReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(receiver,filter);
+
         Uri uri = getIntent().getData();
-        videoView.setMediaController(new MediaController(this));
         videoView.setOnPreparedListener(this);
         videoView.setOnCompletionListener(this);
         videoView.setOnErrorListener(this);
@@ -102,10 +114,20 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     }
 
     @Override
+    protected void onDestroy() {
+        if(receiver != null){
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onPrepared(MediaPlayer mp) {
         videoView.start();
         mediaSeekbar.setMax(videoView.getDuration());
         tvDuration.setText(ToolUtils.timeToString(videoView.getDuration()));
+
         handler.sendEmptyMessage(Constants.UPDATE_SEEKBAR);
     }
 
@@ -156,5 +178,14 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
 
+    }
+
+    class mReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int battery = intent.getIntExtra("level",0);
+            videoBattery.setText(String.valueOf(battery));
+        }
     }
 }
