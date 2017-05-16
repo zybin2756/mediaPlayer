@@ -42,6 +42,7 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
     }
 
 
+    //视频获取成功后通知该handler处理
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -76,7 +77,7 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
                 pb_loading.setVisibility(View.VISIBLE);
                 tv_nomedia.setVisibility(View.GONE);
                 video_list.setVisibility(View.GONE);
-                mediaList = new ArrayList<MediaBean>();
+                mediaList = null;
                 ContentResolver contentResolver = context.getContentResolver();
                 Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                 String[] obj = {
@@ -88,6 +89,7 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
                 };
                 Cursor cursor = contentResolver.query(uri,obj,null,null,null);
                 if(cursor != null){
+                    mediaList = new ArrayList<MediaBean>();
                     while(cursor.moveToNext()){
                         MediaBean bean = new MediaBean();
                         mediaList.add(bean);
@@ -120,12 +122,14 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
 
     @Override
     public void onClick(View v, int position) {
-        MediaBean bean = mediaList.get(position);
-        if(bean != null){
-            Intent intent = new Intent(context,VideoPlayActivity.class);
-            Uri uri = Uri.parse(bean.getData());
-            intent.setDataAndType(uri,"video/*");
-            context.startActivity(intent);
+        if(mediaList != null) {
+            MediaBean bean = mediaList.get(position);
+            if (bean != null) {
+                Intent intent = new Intent(context, VideoPlayActivity.class);
+                Uri uri = Uri.parse(bean.getData());
+                intent.setDataAndType(uri, "video/*");
+                context.startActivity(intent);
+            }
         }
     }
 }

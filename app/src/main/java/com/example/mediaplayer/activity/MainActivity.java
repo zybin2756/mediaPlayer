@@ -65,6 +65,7 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
 
         rb_bottom_group.setOnCheckedChangeListener(this);
         rb_bottom_group.check(0);
+        rb_localvideo.setChecked(true);
     }
 
     @Override
