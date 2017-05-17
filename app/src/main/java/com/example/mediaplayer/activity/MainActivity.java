@@ -3,25 +3,30 @@ package com.example.mediaplayer.activity;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.example.mediaplayer.R;
+import com.example.mediaplayer.application.mediaApplication;
 import com.example.mediaplayer.base.BasePager;
 import com.example.mediaplayer.fragment.mFragment;
 import com.example.mediaplayer.pager.LocalMusicPager;
 import com.example.mediaplayer.pager.LocalVideoPager;
 import com.example.mediaplayer.pager.netMusicPager;
 import com.example.mediaplayer.pager.netVideoPager;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends FragmentActivity implements RadioGroup.OnCheckedChangeListener{
 
+    private final  String TAG = "MainActivity";
     private RadioButton rb_localvideo;
     private RadioButton rb_localmusic;
     private RadioButton rb_netvideo;
@@ -29,10 +34,14 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
     private RadioGroup  rb_bottom_group;
     private List<BasePager> basePagers; //存放pager列表
     private int Pos = 0;
+    private Fragment curFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        RefWatcher refWatcher = mediaApplication.getRefWatcher(getApplicationContext());
+        refWatcher.watch(this);
 
         rb_localvideo = (RadioButton) findViewById(R.id.rb_localvideo);
         rb_localmusic = (RadioButton) findViewById(R.id.rb_localmusic);
@@ -40,23 +49,7 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         rb_netmusic = (RadioButton) findViewById(R.id.rb_netmusic);
         rb_bottom_group = (RadioGroup) findViewById(R.id.rb_bottom_group);
 
-        Drawable drawableVideo = getResources().getDrawable(R.drawable.bottom_rb_localvideo_selector);
-        drawableVideo.setBounds(0, 0, 80, 80);
-        rb_localvideo.setCompoundDrawables(null, drawableVideo, null, null);
-
-        Drawable drawableMusic = getResources().getDrawable(R.drawable.bottom_rb_localmusic_selector);
-        drawableMusic.setBounds(0, 0, 80, 80);
-        rb_localmusic.setCompoundDrawables(null, drawableMusic, null, null);
-
-        Drawable drawablenVideo = getResources().getDrawable(R.drawable.bottom_rb_netvideo_selector);
-        drawablenVideo.setBounds(0, 0, 80, 80);
-        rb_netvideo.setCompoundDrawables(null, drawablenVideo, null, null);
-
-        Drawable drawablenMusic = getResources().getDrawable(R.drawable.bottom_rb_netmusic_selector);
-        drawablenMusic.setBounds(0, 0, 80, 80);
-        rb_netmusic.setCompoundDrawables(null, drawablenMusic, null, null);
-
-
+        Log.i(TAG,"onCreate");
         basePagers = new ArrayList<>();
         basePagers.add(new LocalVideoPager(this));
         basePagers.add(new LocalMusicPager(this));
@@ -64,7 +57,6 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         basePagers.add(new netVideoPager(this));
 
         rb_bottom_group.setOnCheckedChangeListener(this);
-        rb_bottom_group.check(0);
         rb_localvideo.setChecked(true);
     }
 
@@ -93,7 +85,11 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
     private void setFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft =  fragmentManager.beginTransaction();
-        ft.replace(R.id.fl_main,new mFragment(getBasePager()));
+        if(curFragment != null){
+            curFragment = null;
+        }
+        curFragment = mFragment.newInstance(getBasePager());
+        ft.replace(R.id.fl_main,curFragment);
         ft.commit();
     }
 
@@ -108,5 +104,11 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         return basePager;
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        curFragment = null;
+        basePagers = null;
+        mediaApplication.fixInputMethodManagerLeak(this);
+    }
 }

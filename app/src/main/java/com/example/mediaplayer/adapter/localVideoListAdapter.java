@@ -57,10 +57,10 @@ public class LocalVideoListAdapter extends RecyclerView.Adapter<LocalVideoListAd
     }
 
     public class ViewHoler extends RecyclerView.ViewHolder {
-        public TextView tv_video_name;
-        public TextView tv_video_duration;
-        public TextView tv_video_size;
-        public ViewHoler(View itemView) {
+            public TextView tv_video_name;
+            public TextView tv_video_duration;
+            public TextView tv_video_size;
+            public ViewHoler(View itemView) {
             super(itemView);
             tv_video_name = (TextView) itemView.findViewById(R.id.tv_video_name);
             tv_video_duration = (TextView) itemView.findViewById(R.id.tv_video_duration);

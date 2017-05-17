@@ -1,10 +1,12 @@
 package com.example.mediaplayer.pager;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -18,9 +20,11 @@ import android.widget.TextView;
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.activity.VideoPlayActivity;
 import com.example.mediaplayer.adapter.LocalVideoListAdapter;
+import com.example.mediaplayer.application.mediaApplication;
 import com.example.mediaplayer.base.BasePager;
 import com.example.mediaplayer.mListener.mVideoItemClickListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +74,7 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
 
     @Override
     public void initData() {
+        Log.i("LocalVideoPager","initData");
         super.initData();
         new Thread(new Runnable() {
             @Override
@@ -77,7 +82,7 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
                 pb_loading.setVisibility(View.VISIBLE);
                 tv_nomedia.setVisibility(View.GONE);
                 video_list.setVisibility(View.GONE);
-                mediaList = null;
+                mediaList = new ArrayList<MediaBean>();
                 ContentResolver contentResolver = context.getContentResolver();
                 Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                 String[] obj = {
@@ -89,7 +94,6 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
                 };
                 Cursor cursor = contentResolver.query(uri,obj,null,null,null);
                 if(cursor != null){
-                    mediaList = new ArrayList<MediaBean>();
                     while(cursor.moveToNext()){
                         MediaBean bean = new MediaBean();
                         mediaList.add(bean);
@@ -123,13 +127,24 @@ public class LocalVideoPager  extends BasePager implements mVideoItemClickListen
     @Override
     public void onClick(View v, int position) {
         if(mediaList != null) {
-            MediaBean bean = mediaList.get(position);
-            if (bean != null) {
+//            MediaBean bean = mediaList.get(position);
+//            if (bean != null) {
+//                Intent intent = new Intent(context, VideoPlayActivity.class);
+//                Uri uri = Uri.parse(bean.getData());
+//                intent.setDataAndType(uri, "video/*");
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                context.startActivity(intent);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("mediaList", (Serializable) mediaList);
+                bundle.putInt("position",position);
+
                 Intent intent = new Intent(context, VideoPlayActivity.class);
-                Uri uri = Uri.parse(bean.getData());
-                intent.setDataAndType(uri, "video/*");
+                intent.putExtra("info",bundle);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
-        }
+//        }
     }
 }
+

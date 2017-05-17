@@ -69,17 +69,17 @@
             style="@style/bottom_rb_style"/>
         <RadioButton
             android:id="@+id/rb_localmusic"
-            android:drawableTop="@drawable/bottom_rb_localvideo_selector"
+            android:drawableTop="@drawable/bottom_rb_localmusic_selector"
             android:text="@string/txt_localmusic"
             style="@style/bottom_rb_style"/>
         <RadioButton
             android:id="@+id/rb_netvideo"
-            android:drawableTop="@drawable/bottom_rb_localvideo_selector"
+            android:drawableTop="@drawable/bottom_rb_netvideo_selector"
             android:text="@string/txt_netvideo"
             style="@style/bottom_rb_style"/>
         <RadioButton
             android:id="@+id/rb_netmusic"
-            android:drawableTop="@drawable/bottom_rb_localvideo_selector"
+            android:drawableTop="@drawable/bottom_rb_netmusic_selector"
             android:text="@string/txt_netmusic"
             style="@style/bottom_rb_style"/>
     </RadioGroup>

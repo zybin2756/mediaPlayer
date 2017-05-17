@@ -1,10 +1,12 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/5/11.
  */
 
-public class MediaBean {
+public class MediaBean implements Serializable{
     private String name;
     private long duration;
     private long size;

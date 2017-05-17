@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +22,14 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.mediaplayer.R;
+import com.example.mediaplayer.application.mediaApplication;
+import com.squareup.leakcanary.RefWatcher;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import domain.MediaBean;
 import utils.Constants;
 import utils.ToolUtils;
 
@@ -49,23 +57,32 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
 
     private mReceiver receiver;
+    private Uri uri;
+    private List<MediaBean> mediaList;
+    private int position;
 
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case Constants.UPDATE_SEEKBAR:{
-                    int curPosition = videoView.getCurrentPosition();
-                    tvCurTime.setText(ToolUtils.timeToString(curPosition));
-                    mediaSeekbar.setProgress(curPosition);
-                    //移除消息 防止重复 一秒更新一次
-                    removeMessages(Constants.UPDATE_SEEKBAR);
-                    sendEmptyMessageDelayed(Constants.UPDATE_SEEKBAR,1000);
-                    break;
+                    if(videoView != null) {
+                        int curPosition = videoView.getCurrentPosition();
+                        tvCurTime.setText(ToolUtils.timeToString(curPosition));
+                        mediaSeekbar.setProgress(curPosition);
+                        //更新系统时间
+                        videoSystemTime.setText(getSystemTime());
+                        //移除消息 防止重复 一秒更新一次
+                        removeMessages(Constants.UPDATE_SEEKBAR);
+                        sendEmptyMessageDelayed(Constants.UPDATE_SEEKBAR, 1000);
+                        break;
+                    }
                 }
             }
         }
     };
+
+
 
     private void findViews() {
         setContentView(R.layout.activity_video_play);
@@ -95,6 +112,10 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        RefWatcher refWatcher = mediaApplication.getRefWatcher(getApplicationContext());
+        refWatcher.watch(this);
+
         findViews();
 
 
@@ -104,36 +125,120 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(receiver,filter);
 
-        Uri uri = getIntent().getData();
+
         videoView.setOnPreparedListener(this);
         videoView.setOnCompletionListener(this);
         videoView.setOnErrorListener(this);
+
+        getDataFromBundle();
+        playVideo();
+    }
+
+
+    //根据获取的数据源进行视频播放
+    private void playVideo() {
+
+        btnPlayOrPause.setBackgroundResource(R.drawable.control_pause_selector);
         if(uri != null){
             videoView.setVideoURI(uri);
+            videoName.setText(uri.toString());
+            unableButton();
+        }else if(mediaList != null && mediaList.size() > 0){
+            videoView.setVideoPath(mediaList.get(position).getData());
+            videoName.setText(mediaList.get(position).getName());
+            enableButton();
+        }else{
+            Toast.makeText(VideoPlayActivity.this,"没有视频可播放",Toast.LENGTH_SHORT);
         }
+    }
+
+
+    //第三方播放时候禁用上一首和下一首
+    public void unableButton(){
+        btnPre.setEnabled(false);
+        btnNext.setEnabled(false);
+    }
+    public void enableButton(){
+        btnPre.setEnabled(true);
+        btnNext.setEnabled(true);
+    }
+
+    //获取播放的音频数据
+    private void getDataFromBundle() {
+
+        //第三方调用
+        uri = getIntent().getData();
+
+        //自身调用
+        Bundle bundle = getIntent().getBundleExtra("info");
+        position = bundle.getInt("position",0);
+        mediaList = (List<MediaBean>) bundle.getSerializable("mediaList");
+    }
+
+    //上一首
+    public void playNext(){
+        position+=1;
+        if(position >= mediaList.size()){
+            position = 0;
+        }
+        playVideo();
+    }
+
+    //下一首
+    public void playPre(){
+        position-=1;
+        if(position < 0){
+            position = mediaList.size()-1;
+        }
+        playVideo();
+    }
+
+    //获取系统时间
+    private String getSystemTime() {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+
+        return format.format(new Date());
     }
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
+        mediaApplication.fixInputMethodManagerLeak(this);
+        handler.removeCallbacksAndMessages(null);
+
+        if(videoView != null){
+            videoView.stopPlayback();
+            videoView = null;
+        }
         if(receiver != null){
             unregisterReceiver(receiver);
             receiver = null;
         }
-        super.onDestroy();
+
     }
 
+
+    //底层准备好播放视频后回调
     @Override
     public void onPrepared(MediaPlayer mp) {
         videoView.start();
+
         mediaSeekbar.setMax(videoView.getDuration());
+
+        //更新时长
         tvDuration.setText(ToolUtils.timeToString(videoView.getDuration()));
 
+        //更新进度条
         handler.sendEmptyMessage(Constants.UPDATE_SEEKBAR);
+
+
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        
+        if(mediaList != null && mediaList.size() > 0){
+            playNext();
+        }
     }
 
     @Override
@@ -146,8 +251,13 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     public void onClick(View v) {
         if ( v == btnExit ) {
             // Handle clicks for btnExit
+            if(getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
+                btnFullOrNormal.performClick();
+            }else{
+                finish();
+            }
         } else if ( v == btnPre ) {
-            // Handle clicks for btnPre
+            playPre();
         } else if ( v == btnPlayOrPause ) {
             if(videoView.isPlaying()){
                 videoView.pause();
@@ -157,9 +267,16 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
                 btnPlayOrPause.setBackgroundResource(R.drawable.control_pause_selector);
             }
         } else if ( v == btnNext ) {
-            // Handle clicks for btnNext
+            playNext();
         } else if ( v == btnFullOrNormal ) {
             // Handle clicks for btnFullOrNormal
+            if(getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                btnFullOrNormal.setBackgroundResource(R.drawable.control_default_selector);
+            }else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                btnFullOrNormal.setBackgroundResource(R.drawable.control_full_selector);
+            }
         }
     }
 
@@ -178,6 +295,11 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        btnExit.performClick();
     }
 
     class mReceiver extends BroadcastReceiver{

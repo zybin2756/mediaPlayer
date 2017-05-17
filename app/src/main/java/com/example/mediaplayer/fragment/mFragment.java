@@ -16,8 +16,18 @@ import com.example.mediaplayer.base.BasePager;
 public class mFragment extends Fragment {
 
     BasePager basePager;
-    public mFragment(BasePager basePager) {
+
+    public mFragment() {
         super();
+    }
+
+    public static mFragment newInstance(BasePager basePager){
+        mFragment fragment = new mFragment();
+        fragment.setBasePager(basePager);
+        return fragment;
+    }
+
+    public void setBasePager(BasePager basePager){
         this.basePager = basePager;
     }
 
@@ -28,5 +38,11 @@ public class mFragment extends Fragment {
             return this.basePager.rootView;
         }
         return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        this.basePager = null;
+        super.onDestroy();
     }
 }
