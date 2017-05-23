@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mediaplayer">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
-
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <application
         android:name=".application.mediaApplication"
         android:allowBackup="true"
@@ -22,7 +22,31 @@
             android:configChanges="keyboardHidden|orientation|screenSize"></activity>
         <activity android:name=".activity.VideoPlayActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize">
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW"></action>
+                    <category android:name="android.intent.category.DEFAULT"></category>
+                    <category android:name="android.intent.category.BROWSABLE"></category>
+                    <data android:scheme="rtsp"></data>
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW"></action>
+                    <category android:name="android.intent.category.DEFAULT"></category>
+                    <data android:mimeType="video/*"></data>
+                    <data android:mimeType="application/sdp"></data>
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW"></action>
+                    <category android:name="android.intent.category.DEFAULT"></category>
+                    <category android:name="android.intent.category.BROWSABLE"></category>
+                    <data android:scheme="http"></data>
+                    <data android:mimeType="video/mp4"></data>
+                    <data android:mimeType="video/3gp"></data>
+                    <data android:mimeType="video/3gpp"></data>
+                    <data android:mimeType="video/3gpp2"></data>
+                </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
