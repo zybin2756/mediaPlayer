@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+
+
+def siteUrl = 'https://github.com/wyouflf/xUtils3'
+def gitUrl = 'https://github.com/wyouflf/xUtils3.git'
+group = "org.xutils"
+version = "3.5.0"
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 20170405
+        versionName version
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            debuggable true
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+            java.srcDirs = ['src/main/java']
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
+}

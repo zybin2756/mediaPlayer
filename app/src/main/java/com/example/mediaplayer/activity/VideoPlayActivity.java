@@ -41,6 +41,7 @@ import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.leakcanary.RefWatcher;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -397,8 +398,29 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Toast.makeText(VideoPlayActivity.this, "出错啦", Toast.LENGTH_SHORT);
-        return false;
+        if(videoView != null){
+            videoView.stopPlayback();
+        }
+
+        startVitamioPlayer();
+        finish();
+        return true;
+    }
+
+    private void startVitamioPlayer() {
+        if(mediaList != null){
+            Intent intent = new Intent(this,VitamioVideoPlayActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("mediaList", (Serializable) mediaList);
+            intent.putExtra("info",bundle);
+            startActivity(intent);
+        }else if(uri != null){
+            Intent intent = new Intent(this,VitamioVideoPlayActivity.class);
+            intent.setDataAndType(uri,"video/*");
+            startActivity(intent);
+        }else{
+            Toast.makeText(this,"没有视频资源",Toast.LENGTH_SHORT);
+        }
     }
 
     @Override
@@ -501,18 +523,32 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    endX = event.getX();
                     endY = event.getY();
-                    touchRang = screenWidth;
+
                     float distanceY = startY - endY;
-                    float delta =  (distanceY / touchRang);
-                    if (startX > screenWidth / 2) {
-                        delta *= maxVol;
-                        int voice = (int) Math.min(Math.max(curVol+delta,0),100);
-                        updateVolumn(voice);
-                    } else if (startX < screenWidth / 2) {
-                        delta *= 255;
-                        int bright = (int) Math.min(Math.max(curBright+delta,1),255);
-                        updateBrightness(bright);
+                    float distanceX = endX - startX;
+
+                    if(Math.abs(distanceX) > Math.abs(distanceY)){
+                        if(Math.abs(distanceX) < 10) break;
+                        touchRang = screenHeight;
+                        float delta =  (distanceX / touchRang)/100;
+                        delta*=videoView.getDuration();
+                        int progress = (int)Math.min(Math.max(videoView.getCurrentPosition()+delta,0),videoView.getDuration());
+                        updateProgress(progress);
+                    }else{
+                        if(Math.abs(distanceY) < 10) break;
+                        touchRang = screenWidth;
+                        float delta =  (distanceY / touchRang);
+                        if (startX > screenWidth / 2) {
+                            delta *= maxVol;
+                            int voice = (int) Math.min(Math.max(curVol+delta,0),100);
+                            updateVolumn(voice);
+                        } else if (startX < screenWidth / 2) {
+                            delta *= 255;
+                            int bright = (int) Math.min(Math.max(curBright+delta,1),255);
+                            updateBrightness(bright);
+                        }
                     }
                     break;
                 case MotionEvent.ACTION_UP:
@@ -521,6 +557,16 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    //快进
+    private void updateProgress(int progress) {
+        showController();
+        mediaSeekbar.setProgress(progress);
+        videoView.seekTo(progress);
+        tvCurTime.setText(ToolUtils.timeToString(progress));
+        handler.removeMessages(Constants.HIDE_MEDIA_CONTROLLER);
+        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER,5000);
     }
 
 

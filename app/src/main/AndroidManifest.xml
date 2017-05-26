@@ -3,6 +3,11 @@
     package="com.example.mediaplayer">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name=".application.mediaApplication"
         android:allowBackup="true"
@@ -21,7 +26,7 @@
             android:launchMode="singleTask"
             android:configChanges="keyboardHidden|orientation|screenSize"></activity>
         <activity android:name=".activity.VideoPlayActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:theme="@style/noAnimationTheme"
             android:configChanges="keyboardHidden|orientation|screenSize">
                 <intent-filter>
                     <action android:name="android.intent.action.VIEW"></action>
@@ -47,6 +52,21 @@
                 </intent-filter>
         </activity>
 
+        <activity android:name=".activity.VitamioVideoPlayActivity"
+            android:theme="@style/noAnimationTheme"
+            android:configChanges="keyboardHidden|orientation|screenSize">
+        </activity>
+        <!-- Don't forgot InitActivity -->
+        <activity
+            android:name="io.vov.vitamio.activity.InitActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
     </application>
+
+
 
 </manifest>
