@@ -349,7 +349,6 @@ public class VitamioVideoPlayActivity extends Activity implements MediaPlayer.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mediaApplication.fixInputMethodManagerLeak(this);
         handler.removeCallbacksAndMessages(null);
 
@@ -361,7 +360,7 @@ public class VitamioVideoPlayActivity extends Activity implements MediaPlayer.On
             unregisterReceiver(receiver);
             receiver = null;
         }
-
+        super.onDestroy();
     }
 
 

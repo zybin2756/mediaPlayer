@@ -53,8 +53,8 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
         basePagers = new ArrayList<>();
         basePagers.add(new LocalVideoPager(this));
         basePagers.add(new LocalMusicPager(this));
-        basePagers.add(new netMusicPager(this));
         basePagers.add(new netVideoPager(this));
+        basePagers.add(new netMusicPager(this));
 
         rb_bottom_group.setOnCheckedChangeListener(this);
         rb_localvideo.setChecked(true);
@@ -106,9 +106,9 @@ public class MainActivity extends FragmentActivity implements RadioGroup.OnCheck
 
     @Override
     protected void onDestroy() {
+        mediaApplication.fixInputMethodManagerLeak(this);
         super.onDestroy();
         curFragment = null;
         basePagers = null;
-        mediaApplication.fixInputMethodManagerLeak(this);
     }
 }

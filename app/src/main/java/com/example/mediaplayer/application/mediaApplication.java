@@ -4,10 +4,14 @@ import android.app.Application;
 import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 
+import com.squareup.leakcanary.BuildConfig;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
+import org.xutils.x;
+
 import java.lang.reflect.Field;
+
 
 /**
  * Created by Administrator on 2017/5/17 0017.
@@ -71,12 +75,20 @@ public class mediaApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        refWatcher = LeakCanary.install(this);
+        refWatcher = LeakCanary.install(this);//初始化leakcanary
 
         context = getApplicationContext();
+
+        x.Ext.init(this); //初始化xutils
+        x.Ext.setDebug(BuildConfig.DEBUG);
     }
 
     public static Context getContext(){
         return context;
+    }
+
+    @Override
+    public Context createDeviceProtectedStorageContext() {
+        return super.createDeviceProtectedStorageContext();
     }
 }

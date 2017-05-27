@@ -49,6 +49,7 @@
     <FrameLayout
         android:layout_below="@+id/titleBar"
         android:id="@+id/fl_main"
+        android:layout_above="@+id/rb_bottom_group"
         android:layout_centerInParent="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

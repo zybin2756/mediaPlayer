@@ -7,4 +7,5 @@
     <string name="txt_netmusic">网络音乐</string>
     <string name="txt_name">鱼饼影音</string>
     <string name="txt_nomedia">没有可加载视频...</string>
+    <string name="txt_nonet">请检查网络是否连接.</string>
 </resources>

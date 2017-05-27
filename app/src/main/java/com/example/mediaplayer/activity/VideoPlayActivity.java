@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.gesture.GestureUtils;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -15,18 +14,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.v7.widget.LinearLayoutManager;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -35,10 +29,6 @@ import android.widget.VideoView;
 
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.application.mediaApplication;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.io.Serializable;
@@ -56,10 +46,9 @@ import utils.ToolUtils;
  */
 
 public class VideoPlayActivity extends Activity implements MediaPlayer.OnPreparedListener,
-                                                    MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener,
-                                                    View.OnClickListener, SeekBar.OnSeekBarChangeListener,
-                                                    MediaPlayer.OnInfoListener
-{
+        MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener,
+        View.OnClickListener, SeekBar.OnSeekBarChangeListener,
+        MediaPlayer.OnInfoListener {
 
     private VideoView videoView;
     private LinearLayout llTop;
@@ -90,13 +79,13 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
     private AudioManager audioManager; //音量控制
 
-    private float   startX; //按下X坐标
-    private float   startY; //按下Y坐标
-    private float   endX;
-    private float   endY;
-    private int     maxVol;
-    private int     curVol; //滑动前音量
-    private float   touchRang; //屏幕竖直距离
+    private float startX; //按下X坐标
+    private float startY; //按下Y坐标
+    private float endX;
+    private float endY;
+    private int maxVol;
+    private int curVol; //滑动前音量
+    private float touchRang; //屏幕竖直距离
     private int curBright; //当前亮度
 
     private int screenWidth;
@@ -112,16 +101,16 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
             switch (msg.what) {
                 case Constants.UPDATE_SPEED:
                     String speed = ToolUtils.getNetSpeed(VideoPlayActivity.this);
-                    if(ll_loading.getVisibility() == View.VISIBLE ){
-                        tv_loading_speed.setText("玩命加载中..."+speed);
-                    }else if(ll_buffer.getVisibility() == View.VISIBLE){
-                        tv_speed.setText("缓冲中..."+speed);
+                    if (ll_loading.getVisibility() == View.VISIBLE) {
+                        tv_loading_speed.setText("玩命加载中..." + speed);
+                    } else if (ll_buffer.getVisibility() == View.VISIBLE) {
+                        tv_speed.setText("缓冲中..." + speed);
                     }
 
                     removeMessages(Constants.UPDATE_SPEED);
                     sendEmptyMessageDelayed(Constants.UPDATE_SPEED, 1000);
                     break;
-                case Constants.HIDE_MEDIA_CONTROLLER:{
+                case Constants.HIDE_MEDIA_CONTROLLER: {
                     hideController();
                     handler.removeMessages(Constants.HIDE_MEDIA_CONTROLLER);
                     break;
@@ -134,23 +123,23 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
                         //更新系统时间
                         videoSystemTime.setText(getSystemTime());
 
-                        if(isNetUri){
+                        if (isNetUri) {
                             int buffer = videoView.getBufferPercentage();
-                            int secondProgess = buffer * mediaSeekbar.getMax()/100;
+                            int secondProgess = buffer * mediaSeekbar.getMax() / 100;
                             mediaSeekbar.setSecondaryProgress(secondProgess);
-                        }else{
+                        } else {
                             mediaSeekbar.setSecondaryProgress(0);
                         }
 
                         //自定义判断卡顿方法 判断两次进度差小于500则卡
-                        if(!isUseSystem){
-                            if(videoView.isPlaying()) {
+                        if (!isUseSystem) {
+                            if (videoView.isPlaying()) {
                                 if (curPosition - prePosition < 500) {
                                     ll_buffer.setVisibility(View.VISIBLE);
                                 } else {
                                     ll_buffer.setVisibility(View.GONE);
                                 }
-                            }else{
+                            } else {
                                 ll_buffer.setVisibility(View.GONE);
                             }
                         }
@@ -185,8 +174,8 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
         rl_controller_bar = (RelativeLayout) findViewById(R.id.rl_controller_bar);
         ll_buffer = (LinearLayout) findViewById(R.id.ll_buffer);
         ll_loading = (LinearLayout) findViewById(R.id.ll_loading);
-        tv_speed  = (TextView) findViewById(R.id.tv_speed);
-        tv_loading_speed  = (TextView) findViewById(R.id.tv_loading_speed);
+        tv_speed = (TextView) findViewById(R.id.tv_speed);
+        tv_loading_speed = (TextView) findViewById(R.id.tv_loading_speed);
 
         btnExit.setOnClickListener(this);
         btnPre.setOnClickListener(this);
@@ -218,7 +207,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
         videoView.setOnPreparedListener(this);
         videoView.setOnCompletionListener(this);
         videoView.setOnErrorListener(this);
-        if(isUseSystem){
+        if (isUseSystem) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 videoView.setOnInfoListener(this);
             }
@@ -233,7 +222,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                if(getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                     if (isMediaControllerVisible) {
                         handler.sendEmptyMessage(Constants.HIDE_MEDIA_CONTROLLER);
                     } else {
@@ -304,7 +293,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
         //自身调用
         Bundle bundle = getIntent().getBundleExtra("info");
-        if(bundle != null) {
+        if (bundle != null) {
             position = bundle.getInt("position", 0);
             mediaList = (List<MediaBean>) bundle.getSerializable("mediaList");
         }
@@ -339,24 +328,24 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     *
     * 隐藏控制栏
     * */
-    private void hideController(){
-        if(getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+    private void hideController() {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             isMediaControllerVisible = false;
             rl_controller_bar.setVisibility(View.GONE);
         }
     }
-     /*
-    *
-    * 显示控制栏
-    * */
-     private void showController(){
-         isMediaControllerVisible = true;
-         rl_controller_bar.setVisibility(View.VISIBLE);
-     }
+
+    /*
+   *
+   * 显示控制栏
+   * */
+    private void showController() {
+        isMediaControllerVisible = true;
+        rl_controller_bar.setVisibility(View.VISIBLE);
+    }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mediaApplication.fixInputMethodManagerLeak(this);
         handler.removeCallbacksAndMessages(null);
 
@@ -369,6 +358,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
             receiver = null;
         }
 
+        super.onDestroy();
     }
 
 
@@ -398,7 +388,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        if(videoView != null){
+        if (videoView != null) {
             videoView.stopPlayback();
         }
 
@@ -408,18 +398,18 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     }
 
     private void startVitamioPlayer() {
-        if(mediaList != null){
-            Intent intent = new Intent(this,VitamioVideoPlayActivity.class);
+        if (mediaList != null) {
+            Intent intent = new Intent(this, VitamioVideoPlayActivity.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("mediaList", (Serializable) mediaList);
-            intent.putExtra("info",bundle);
+            intent.putExtra("info", bundle);
             startActivity(intent);
-        }else if(uri != null){
-            Intent intent = new Intent(this,VitamioVideoPlayActivity.class);
-            intent.setDataAndType(uri,"video/*");
+        } else if (uri != null) {
+            Intent intent = new Intent(this, VitamioVideoPlayActivity.class);
+            intent.setDataAndType(uri, "video/*");
             startActivity(intent);
-        }else{
-            Toast.makeText(this,"没有视频资源",Toast.LENGTH_SHORT);
+        } else {
+            Toast.makeText(this, "没有视频资源", Toast.LENGTH_SHORT);
         }
     }
 
@@ -459,7 +449,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
             }
         }
         handler.removeMessages(Constants.HIDE_MEDIA_CONTROLLER);
-        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER,5000);
+        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER, 5000);
     }
 
     @Override
@@ -476,7 +466,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER,5000);
+        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER, 5000);
     }
 
     @Override
@@ -486,7 +476,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        switch (what){
+        switch (what) {
             case MediaPlayer.MEDIA_INFO_BUFFERING_START:
                 ll_buffer.setVisibility(View.VISIBLE);
                 break;
@@ -510,7 +500,7 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
     public boolean onTouchEvent(MotionEvent event) {
         gestureDetector.onTouchEvent(event);
 
-        if(getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     startX = event.getX();
@@ -529,24 +519,24 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
                     float distanceY = startY - endY;
                     float distanceX = endX - startX;
 
-                    if(Math.abs(distanceX) > Math.abs(distanceY)){
-                        if(Math.abs(distanceX) < 10) break;
+                    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                        if (Math.abs(distanceX) < 10) break;
                         touchRang = screenHeight;
-                        float delta =  (distanceX / touchRang)/100;
-                        delta*=videoView.getDuration();
-                        int progress = (int)Math.min(Math.max(videoView.getCurrentPosition()+delta,0),videoView.getDuration());
+                        float delta = (distanceX / touchRang) / 100;
+                        delta *= videoView.getDuration();
+                        int progress = (int) Math.min(Math.max(videoView.getCurrentPosition() + delta, 0), videoView.getDuration());
                         updateProgress(progress);
-                    }else{
-                        if(Math.abs(distanceY) < 10) break;
+                    } else {
+                        if (Math.abs(distanceY) < 10) break;
                         touchRang = screenWidth;
-                        float delta =  (distanceY / touchRang);
+                        float delta = (distanceY / touchRang);
                         if (startX > screenWidth / 2) {
                             delta *= maxVol;
-                            int voice = (int) Math.min(Math.max(curVol+delta,0),100);
+                            int voice = (int) Math.min(Math.max(curVol + delta, 0), 100);
                             updateVolumn(voice);
                         } else if (startX < screenWidth / 2) {
                             delta *= 255;
-                            int bright = (int) Math.min(Math.max(curBright+delta,1),255);
+                            int bright = (int) Math.min(Math.max(curBright + delta, 1), 255);
                             updateBrightness(bright);
                         }
                     }
@@ -566,19 +556,19 @@ public class VideoPlayActivity extends Activity implements MediaPlayer.OnPrepare
         videoView.seekTo(progress);
         tvCurTime.setText(ToolUtils.timeToString(progress));
         handler.removeMessages(Constants.HIDE_MEDIA_CONTROLLER);
-        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER,5000);
+        handler.sendEmptyMessageDelayed(Constants.HIDE_MEDIA_CONTROLLER, 5000);
     }
 
 
     //设置音量
     private void updateVolumn(int newVol) {
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,newVol,AudioManager.FLAG_SHOW_UI);
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, AudioManager.FLAG_SHOW_UI);
     }
 
     //设置屏幕亮度
-    private void updateBrightness(int newBright){
+    private void updateBrightness(int newBright) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.screenBrightness = newBright/255f;
+        lp.screenBrightness = newBright / 255f;
         getWindow().setAttributes(lp);
     }
 }
