@@ -2,6 +2,7 @@ package com.example.mediaplayer.pager;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -82,6 +83,8 @@ public class netVideoPager extends BasePager implements mVideoItemClickListener 
             @Override
             public void onSuccess(String result) {
                 Log.i(TAG, "onSuccess");
+                SharedPreferences sharedPreferences = context.getSharedPreferences("cache",Context.MODE_PRIVATE);
+                sharedPreferences.edit().putString("netVideo",result).commit();
                 processData(result);
             }
 
@@ -91,6 +94,13 @@ public class netVideoPager extends BasePager implements mVideoItemClickListener 
                 showList(false);
                 showProgressBar(false);
                 showTip(true);
+
+                SharedPreferences sharedPreferences = context.getSharedPreferences("cache",Context.MODE_PRIVATE);
+                if(sharedPreferences != null) {
+                    String result = sharedPreferences.getString("netVideo", "");
+                    if (result != "")
+                        processData(result);
+                }
             }
 
             @Override

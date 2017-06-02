@@ -56,6 +56,9 @@
             android:theme="@style/noAnimationTheme"
             android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
+
+        <activity android:name=".activity.AudioPlayActivity"></activity>
+
         <!-- Don't forgot InitActivity -->
         <activity
             android:name="io.vov.vitamio.activity.InitActivity"

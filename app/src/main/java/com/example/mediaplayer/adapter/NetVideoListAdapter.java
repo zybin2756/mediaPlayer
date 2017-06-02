@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.mListener.mVideoItemClickListener;
 
@@ -46,7 +48,15 @@ public class NetVideoListAdapter  extends RecyclerView.Adapter<NetVideoListAdapt
         //holder.imgCover.setImageBitmap(netMediaBean.getCoverImg());
         holder.tv_movie_title.setText(netMediaBean.getVideoTitle());
         holder.tv_movie_summary.setText(netMediaBean.getSummary());
-        x.image().bind(holder.imgCover,netMediaBean.getCoverImg());
+
+        //1.xUtils加载图片
+        //x.image().bind(holder.imgCover,netMediaBean.getCoverImg());
+
+        //2.Glide加载图片
+        Glide.with(context)
+                .load(netMediaBean.getCoverImg())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.imgCover);
     }
 
     @Override
